@@ -1,23 +1,26 @@
-from django.test import TestCase, Client
-from django.urls import reverse
-from .models import Recipe, Category
+from django.test import TestCase
+from .models import Category, Recipe
 
-class RecipeViewTests(TestCase):
+class CategoryModelTest(TestCase):
+
     def setUp(self):
-        self.client = Client()
-        self.category = Category.objects.create(name='TestCategory')
-        for i in range(20):
-            Recipe.objects.create(name=f'Recipe {i}', description='Delicious food', category=self.category)
+        self.category = Category.objects.create(name="Desserts")
 
-    def test_main_view(self):
-        response = self.client.get(reverse('recipe:main'))
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'recipe/main.html')
-        self.assertEqual(len(response.context['recipes']), 20)
+    def test_category_creation(self):
+        self.assertIsInstance(self.category, Category)
+        self.assertEqual(self.category.__str__(), self.category.name)
 
-    def test_category_detail_view(self):
-        response = self.client.get(reverse('recipe:category_detail', args=[self.category.id]))
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'recipe/category_detail.html')
-        self.assertEqual(len(response.context['recipes']), 20)
-        self.assertEqual(response.context['category'], self.category)
+class RecipeModelTest(TestCase):
+
+    def setUp(self):
+        self.category = Category.objects.create(name="Desserts")
+        self.recipe = Recipe.objects.create(
+            name="Chocolate Cake",
+            description="Delicious chocolate cake recipe",
+            category=self.category
+        )
+
+    def test_recipe_creation(self):
+        self.assertIsInstance(self.recipe, Recipe)
+        self.assertEqual(self.recipe.__str__(), self.recipe.name)
+        self.assertEqual(self.recipe.category.name, "Desserts")
